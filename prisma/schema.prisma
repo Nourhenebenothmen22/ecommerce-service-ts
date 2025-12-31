@@ -12,3 +12,81 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+
+// ============================
+// Modèle User
+// ============================
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  orders    Order[]
+}
+
+// ============================
+// Modèle Category
+// ============================
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+
+  products  Product[] // Une catégorie peut avoir plusieurs produits
+}
+
+// ============================
+// Modèle Product
+// ============================
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  stock       Int
+  createdAt   DateTime    @default(now())
+  categoryId  Int
+
+  category    Category    @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+}
+
+// ============================
+// Modèle Order
+// ============================
+model Order {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  total     Float
+  status    Status   @default(PENDING)
+  createdAt DateTime @default(now())
+
+  user      User        @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+}
+
+// ============================
+// Modèle OrderItem
+// ============================
+model OrderItem {
+  id        Int       @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int       @default(1)
+  price     Float
+
+  order     Order     @relation(fields: [orderId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+}
+
+// ============================
+// Enum Status
+// ============================
+enum Status {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
